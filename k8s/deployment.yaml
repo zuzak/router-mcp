@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: router-mcp
-  namespace: claude
+  namespace: claude-router-mcp
   labels:
     app: router-mcp
 spec:

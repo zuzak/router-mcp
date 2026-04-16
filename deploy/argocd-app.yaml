@@ -16,7 +16,7 @@ spec:
     path: k8s
   destination:
     server: https://kubernetes.default.svc
-    namespace: claude
+    namespace: claude-router-mcp
   syncPolicy:
     automated:
       prune: true
