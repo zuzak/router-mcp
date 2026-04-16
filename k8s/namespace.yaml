@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: claude-router-mcp
   labels:
-    managed-by: claude
+    owner: claude
