@@ -1,0 +1,25 @@
+# ArgoCD Application manifest.
+# This file belongs in apps/claude/ in the kube repo, not in this repo.
+# It is kept here as a reference for the deployment operator.
+#
+# To deploy: copy to zuzak/kube apps/claude/router-mcp.yaml and sync ArgoCD.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: router-mcp
+  namespace: argocd
+spec:
+  project: claude
+  source:
+    repoURL: https://github.com/zuzak/router-mcp
+    targetRevision: HEAD
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: claude
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

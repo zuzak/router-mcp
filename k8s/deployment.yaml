@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router-mcp
+  namespace: claude
+  labels:
+    app: router-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router-mcp
+  template:
+    metadata:
+      labels:
+        app: router-mcp
+    spec:
+      # Hard pin to the Pi — this service must reach 192.168.1.1 on the LAN.
+      # The router is not reachable from the VPS node.
+      nodeSelector:
+        kubernetes.io/hostname: pi.home.arpa
+      containers:
+        - name: router-mcp
+          image: ghcr.io/zuzak/router-mcp:latest
+          imagePullPolicy: Always
+          ports:
+            - name: read
+              containerPort: 8080
+              protocol: TCP
+            - name: routine
+              containerPort: 8081
+              protocol: TCP
+            - name: dangerous
+              containerPort: 8082
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: router-mcp
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

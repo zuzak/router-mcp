@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: router-mcp
+  namespace: claude
+  labels:
+    app: router-mcp
+spec:
+  # LoadBalancer via k3s ServiceLB — assigns the Pi's LAN IP as ExternalIP,
+  # making all three ports reachable from any device on the home network.
+  type: LoadBalancer
+  selector:
+    app: router-mcp
+  ports:
+    - name: read
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: routine
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+    - name: dangerous
+      port: 8082
+      targetPort: 8082
+      protocol: TCP
