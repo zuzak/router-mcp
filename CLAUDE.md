@@ -39,7 +39,7 @@ python server.py
 1. Create the secret (see `k8s/secret.example.yaml` for the full list of keys):
 
 ```bash
-kubectl -n claude create secret generic router-mcp \
+kubectl -n claude-router-mcp create secret generic router-mcp \
   --from-literal=ROUTER_BASE_URL=https://192.168.1.1 \
   --from-literal=ROUTER_USERNAME=admin \
   --from-literal=ROUTER_PASSWORD=<password> \

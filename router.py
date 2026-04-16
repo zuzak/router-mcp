@@ -15,9 +15,9 @@ from Crypto.Util.Padding import pad
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-BASE     = "https://192.168.1.1"
-USERNAME = "admin"
-PASSWORD = "K7L4EUD8"
+BASE     = os.environ.get("ROUTER_BASE_URL", "https://192.168.1.1")
+USERNAME = os.environ.get("ROUTER_USERNAME", "admin")
+PASSWORD = os.environ["ROUTER_PASSWORD"]
 
 s = requests.Session()
 s.verify = False
