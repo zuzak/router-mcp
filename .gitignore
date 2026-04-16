@@ -6,3 +6,4 @@ __pycache__/
 venv/
 dist/
 .claude/
+gh-auth.sh
