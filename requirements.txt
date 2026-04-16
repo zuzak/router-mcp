@@ -1,0 +1,6 @@
+mcp>=1.0,<2.0
+pycryptodome>=3.19
+requests>=2.31
+urllib3>=2.0
+uvicorn[standard]>=0.27
+starlette>=0.36
