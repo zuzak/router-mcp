@@ -36,11 +36,6 @@ spec:
           envFrom:
             - secretRef:
                 name: router-mcp
-          readinessProbe:
-            tcpSocket:
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
           resources:
             requests:
               memory: "64Mi"
