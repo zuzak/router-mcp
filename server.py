@@ -61,7 +61,7 @@ def build_tier_app(
     server_name: str,
     tier_module,
     client: RouterClient,
-    api_key: str,
+    api_key: str | None,
 ) -> Starlette:
     """
     Build an authenticated Starlette ASGI app for one MCP tier.
@@ -81,7 +81,7 @@ def build_tier_app(
     )
 
     async def handle_sse(request: Request):
-        if request.headers.get("x-api-key") != api_key:
+        if api_key is not None and request.headers.get("x-api-key") != api_key:
             return Response("Unauthorized", status_code=401)
         async with sse.connect_sse(
             request.scope, request.receive, request._send
@@ -89,7 +89,7 @@ def build_tier_app(
             await server.run(streams[0], streams[1], init_options)
 
     async def handle_messages(request: Request):
-        if request.headers.get("x-api-key") != api_key:
+        if api_key is not None and request.headers.get("x-api-key") != api_key:
             return Response("Unauthorized", status_code=401)
         await sse.handle_post_message(request.scope, request.receive, request._send)
 
@@ -128,7 +128,7 @@ async def main() -> None:
                 "router-read",
                 read_tools,
                 read_client,
-                _require_env("READ_API_KEY"),
+                os.environ.get("READ_API_KEY"),
             ),
             8080,
         ),
@@ -137,7 +137,7 @@ async def main() -> None:
                 "router-routine",
                 routine_tools,
                 routine_client,
-                _require_env("ROUTINE_API_KEY"),
+                os.environ.get("ROUTINE_API_KEY"),
             ),
             8081,
         ),
@@ -146,7 +146,7 @@ async def main() -> None:
                 "router-dangerous",
                 dangerous_tools,
                 dangerous_client,
-                _require_env("DANGEROUS_API_KEY"),
+                os.environ.get("DANGEROUS_API_KEY"),
             ),
             8082,
         ),
