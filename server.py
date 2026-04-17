@@ -122,43 +122,35 @@ async def main() -> None:
     )
     dangerous_client = RouterClient(base_url, admin_user, admin_pass)
 
-    tiers = []
-
-    read_key = os.environ.get("READ_API_KEY")
-    if read_key:
-        tiers.append(
-            (
-                build_tier_app("router-read", read_tools, read_client, read_key),
-                8080,
-            )
-        )
-
-    routine_key = os.environ.get("ROUTINE_API_KEY")
-    if routine_key:
-        tiers.append(
-            (
-                build_tier_app(
-                    "router-routine", routine_tools, routine_client, routine_key
-                ),
-                8081,
-            )
-        )
-
-    dangerous_key = os.environ.get("DANGEROUS_API_KEY")
-    if dangerous_key:
-        tiers.append(
-            (
-                build_tier_app(
-                    "router-dangerous", dangerous_tools, dangerous_client, dangerous_key
-                ),
-                8082,
-            )
-        )
-
-    if not tiers:
-        raise RuntimeError(
-            "At least one of READ_API_KEY, ROUTINE_API_KEY, or DANGEROUS_API_KEY must be set"
-        )
+    tiers = [
+        (
+            build_tier_app(
+                "router-read",
+                read_tools,
+                read_client,
+                os.environ.get("READ_API_KEY"),
+            ),
+            8080,
+        ),
+        (
+            build_tier_app(
+                "router-routine",
+                routine_tools,
+                routine_client,
+                os.environ.get("ROUTINE_API_KEY"),
+            ),
+            8081,
+        ),
+        (
+            build_tier_app(
+                "router-dangerous",
+                dangerous_tools,
+                dangerous_client,
+                os.environ.get("DANGEROUS_API_KEY"),
+            ),
+            8082,
+        ),
+    ]
 
     servers = [
         uvicorn.Server(

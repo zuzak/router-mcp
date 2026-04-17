@@ -19,19 +19,6 @@ losing one doesn't compromise the others.
 The server runs on the Pi node in Kubernetes because it needs LAN access to
 `192.168.1.1`. It is not reachable from, or schedulable on, the VPS node.
 
-## Optional tiers
-
-Tiers are only started if their corresponding API key environment variable is set.
-This allows granting partial access (e.g., read-only) by provisioning only the keys
-needed. If no API keys are set, the server exits with an error.
-
-Example: to run read-only, set only `READ_API_KEY`. The other two tiers won't start,
-and their ports won't be exposed. Useful for:
-
-- Initial testing or debugging (read-only access first, other tiers enabled later)
-- Access control (Claude gets read access by default, elevated tiers gated by API key provisioning)
-- Shared environments where different clients need different access levels
-
 ## Running locally
 
 ```bash
@@ -41,33 +28,24 @@ export ROUTER_BASE_URL=https://192.168.1.1
 export ROUTER_USERNAME=admin
 export ROUTER_PASSWORD=yourpassword
 export READ_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-
-# Optionally add more tiers:
-# export ROUTINE_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-# export DANGEROUS_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+export ROUTINE_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+export DANGEROUS_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
 
 python server.py
 ```
 
-At least one API key must be set for the server to start.
-
 ## Deploying to Kubernetes
 
-1. Create the secret. At least one API key must be set; tiers without a key
-   won't start. (See `k8s/secret.example.yaml` for all available keys.)
+1. Create the secret (see `k8s/secret.example.yaml` for the full list of keys):
 
 ```bash
 kubectl -n claude-router-mcp create secret generic router-mcp \
   --from-literal=ROUTER_BASE_URL=https://192.168.1.1 \
   --from-literal=ROUTER_USERNAME=admin \
   --from-literal=ROUTER_PASSWORD=<password> \
-  --from-literal=READ_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-```
-
-   To enable additional tiers, add their keys:
-```bash
-  --from-literal=ROUTINE_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-  --from-literal=DANGEROUS_API_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+  --from-literal=READ_API_KEY=<key> \
+  --from-literal=ROUTINE_API_KEY=<key> \
+  --from-literal=DANGEROUS_API_KEY=<key>
 ```
 
 2. Add the ArgoCD Application to the kube repo:
@@ -82,8 +60,7 @@ cp deploy/argocd-app.yaml /path/to/kube/apps/claude/router-mcp.yaml
 
 ## Claude Code configuration
 
-Add entries to `~/.claude/settings.json` (or the machine-specific override) for
-the tiers you enabled (i.e., for which API keys are set in the k8s Secret):
+Add to `~/.claude/settings.json` (or the machine-specific override):
 
 ```json
 {
@@ -107,12 +84,8 @@ the tiers you enabled (i.e., for which API keys are set in the k8s Secret):
 }
 ```
 
-For permission model:
-- Set `router-read` to auto-allow (no side effects, safe for all contexts)
-- Set `router-routine` and `router-dangerous` to `ask` so they prompt before executing
-
-Omit entries for tiers you didn't enable (e.g., if only `READ_API_KEY` is set,
-only add the `router-read` entry).
+Set `router-read` to auto-allow; leave `router-routine` and `router-dangerous`
+on `ask` so they prompt before executing.
 
 ## Discovering write OIDs
 
